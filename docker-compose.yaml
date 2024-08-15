@@ -21,10 +21,14 @@ services:
       - "27017:27017"
     volumes:
       - mongo1_data:/data/db
+      - ./mongo-keyfile:/etc/mongo-keyfile
     environment:
       MONGO_INITDB_ROOT_USERNAME: guest
       MONGO_INITDB_ROOT_PASSWORD: guest
-    command: mongod --replSet rs0 --bind_ip_all
+    command: >
+      bash -c "
+      chmod 400 /etc/mongo-keyfile &&
+      mongod --replSet rs0 --bind_ip_all --keyFile /etc/mongo-keyfile"
 
   mongo2:
     image: mongo:4.4
@@ -32,10 +36,14 @@ services:
       - "27018:27017"
     volumes:
       - mongo2_data:/data/db
+      - ./mongo-keyfile:/etc/mongo-keyfile
     environment:
       MONGO_INITDB_ROOT_USERNAME: guest
       MONGO_INITDB_ROOT_PASSWORD: guest
-    command: mongod --replSet rs0 --bind_ip_all
+    command: >
+      bash -c "
+      chmod 400 /etc/mongo-keyfile &&
+      mongod --replSet rs0 --bind_ip_all --keyFile /etc/mongo-keyfile"
 
   mongo3:
     image: mongo:4.4
@@ -43,10 +51,14 @@ services:
       - "27019:27017"
     volumes:
       - mongo3_data:/data/db
+      - ./mongo-keyfile:/etc/mongo-keyfile
     environment:
       MONGO_INITDB_ROOT_USERNAME: guest
       MONGO_INITDB_ROOT_PASSWORD: guest
-    command: mongod --replSet rs0 --bind_ip_all
+    command: >
+      bash -c "
+      chmod 400 /etc/mongo-keyfile &&
+      mongod --replSet rs0 --bind_ip_all --keyFile /etc/mongo-keyfile"
 
   mongo-setup:
     image: mongo:4.4
@@ -57,7 +69,7 @@ services:
     command: >
       bash -c "
       sleep 5;
-      echo 'rs.initiate({_id: \"rs0\", members: [{ _id: 0, host: \"mongo1:27017\" }, { _id: 1, host: \"mongo2:27018\" }, { _id: 2, host: \"mongo3:27019\" }]})' | mongo --host mongo1:27017"
+      mongo --host mongo1:27017 -u guest -p guest --authenticationDatabase admin --eval 'rs.initiate({_id: \"rs0\", members: [{ _id: 0, host: \"mongo1:27017\" }, { _id: 1, host: \"mongo2:27018\" }, { _id: 2, host: \"mongo3:27019\" }]})'"
 
 volumes:
   rabbitmq_data:
