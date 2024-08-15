@@ -1,0 +1,19 @@
+services:
+  stock-publisher:
+    image: stock-publisher
+    environment:
+      - RABBITMQ_URL=amqp://stockmarket:supersecret123@rabbitmq:5672/
+      - TICKER_INTERVAL=1
+    depends_on:
+      - rabbitmq
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+volumes:
+  rabbitmq_data:
