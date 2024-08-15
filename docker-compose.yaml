@@ -1,6 +1,6 @@
 services:
   stock-publisher:
-    image: stock-publisher
+    image: manuelbrunner/stock-publisher
     environment:
       - RABBITMQ_URL=amqp://stockmarket:supersecret123@rabbitmq:5672/
       - TICKER_INTERVAL=1
@@ -15,5 +15,52 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
+  mongo1:
+    image: mongo:4.4
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo1_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: guest
+      MONGO_INITDB_ROOT_PASSWORD: guest
+    command: mongod --replSet rs0 --bind_ip_all
+
+  mongo2:
+    image: mongo:4.4
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo2_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: guest
+      MONGO_INITDB_ROOT_PASSWORD: guest
+    command: mongod --replSet rs0 --bind_ip_all
+
+  mongo3:
+    image: mongo:4.4
+    ports:
+      - "27019:27017"
+    volumes:
+      - mongo3_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: guest
+      MONGO_INITDB_ROOT_PASSWORD: guest
+    command: mongod --replSet rs0 --bind_ip_all
+
+  mongo-setup:
+    image: mongo:4.4
+    depends_on:
+      - mongo1
+      - mongo2
+      - mongo3
+    command: >
+      bash -c "
+      sleep 5;
+      echo 'rs.initiate({_id: \"rs0\", members: [{ _id: 0, host: \"mongo1:27017\" }, { _id: 1, host: \"mongo2:27018\" }, { _id: 2, host: \"mongo3:27019\" }]})' | mongo --host mongo1:27017"
+
 volumes:
   rabbitmq_data:
+  mongo1_data:
+  mongo2_data:
+  mongo3_data:
