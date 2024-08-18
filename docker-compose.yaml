@@ -14,6 +14,9 @@ services:
       - "5672:5672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: stockmarket
+      RABBITMQ_DEFAULT_PASS: supersecret123
 
   mongo1:
     image: mongo:4.4
@@ -72,7 +75,7 @@ services:
       mongo --host mongo1:27017 -u guest -p guest --authenticationDatabase admin --eval 'rs.initiate({_id: \"rs0\", members: [{ _id: 0, host: \"mongo1:27017\" }, { _id: 1, host: \"mongo2:27018\" }, { _id: 2, host: \"mongo3:27019\" }]})'"
 
   stock-liveview:
-    image: stock-liveview
+    image: manuelbrunner/stock-liveview
     environment:
       - MONGODB_URL=mongodb://mongo1:27017,mongo2:27018,mongo3:27019/?replicaSet=rs0
       - MONGODB_DB=stockmarket
