@@ -74,7 +74,7 @@ services:
       sleep 5;
       mongo --host mongo1:27017 -u guest -p guest --authenticationDatabase admin --eval 'rs.initiate({_id: \"rs0\", members: [{ _id: 0, host: \"mongo1:27017\" }, { _id: 1, host: \"mongo2:27018\" }, { _id: 2, host: \"mongo3:27019\" }]})'"
 
-  stock-liveview:
+  stock-liveview1:
     image: manuelbrunner/stock-liveview
     environment:
       - MONGODB_URL=mongodb://mongo1:27017,mongo2:27018,mongo3:27019/?replicaSet=rs0
@@ -83,8 +83,19 @@ services:
       - NODE_ENV=production
       - PORT=3000
     ports:
-      - "3000:3000"
-      
+      - "3001:3000"
+
+  stock-liveview2:
+    image: manuelbrunner/stock-liveview
+    environment:
+      - MONGODB_URL=mongodb://mongo1:27017,mongo2:27018,mongo3:27019/?replicaSet=rs0
+      - MONGODB_DB=stockmarket
+      - MONGODB_COLLECTION=stocks
+      - NODE_ENV=production
+      - PORT=3000
+    ports:
+      - "3002:3000"    
+        
 volumes:
   rabbitmq_data:
   mongo1_data:
