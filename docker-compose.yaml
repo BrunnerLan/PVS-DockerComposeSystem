@@ -29,9 +29,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: guest
       MONGO_INITDB_ROOT_PASSWORD: guest
     command: >
-      bash -c "
-      chmod 400 /etc/mongo-keyfile &&
-      mongod --replSet rs0 --bind_ip_all --keyFile /etc/mongo-keyfile"
+      bash -c " chmod 400 /etc/mongo-keyfile && mongod --replSet rs0 --bind_ip_all --keyFile /etc/mongo-keyfile"
 
   mongo2:
     image: mongo:4.4
@@ -44,9 +42,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: guest
       MONGO_INITDB_ROOT_PASSWORD: guest
     command: >
-      bash -c "
-      chmod 400 /etc/mongo-keyfile &&
-      mongod --replSet rs0 --bind_ip_all --keyFile /etc/mongo-keyfile"
+      bash -c " chmod 400 /etc/mongo-keyfile && mongod --replSet rs0 --bind_ip_all --keyFile /etc/mongo-keyfile"
 
   mongo3:
     image: mongo:4.4
@@ -59,9 +55,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: guest
       MONGO_INITDB_ROOT_PASSWORD: guest
     command: >
-      bash -c "
-      chmod 400 /etc/mongo-keyfile &&
-      mongod --replSet rs0 --bind_ip_all --keyFile /etc/mongo-keyfile"
+      bash -c " chmod 400 /etc/mongo-keyfile && mongod --replSet rs0 --bind_ip_all --keyFile /etc/mongo-keyfile"
 
   mongo-setup:
     image: mongo:4.4
@@ -70,9 +64,19 @@ services:
       - mongo2
       - mongo3
     command: >
-      bash -c "
-      sleep 5;
-      mongo --host mongo1:27017 -u guest -p guest --authenticationDatabase admin --eval 'rs.initiate({_id: \"rs0\", members: [{ _id: 0, host: \"mongo1:27017\" }, { _id: 1, host: \"mongo2:27018\" }, { _id: 2, host: \"mongo3:27019\" }]})'"
+      bash -c " sleep 5; mongo --host mongo1:27017 -u guest -p guest --authenticationDatabase admin --eval 'rs.initiate({_id: \"rs0\", members: [{ _id: 0, host: \"mongo1:27017\" }, { _id: 1, host: \"mongo2:27018\" }, { _id: 2, host: \"mongo3:27019\" }]})'"
+
+  consumer:
+    image: oz96/consumer:v1
+    environment:
+      - RABBITMQ_URL=amqp://stockmarket:supersecret123@rabbitmq:5672/
+      - MONGO_URL=mongodb://mongodb:27017/
+      - QUEUE_NAME=stock_queue
+    depends_on:
+      - rabbitmq
+      - mongo1
+      - mongo2
+      - mongo3
 
   stock-liveview1:
     image: manuelbrunner/stock-liveview
